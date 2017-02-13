@@ -117,6 +117,10 @@ var (
 	collectEngineInnodbStatus = flag.Bool("collect.engine_innodb_status", false,
 		"Collect from SHOW ENGINE INNODB STATUS",
 	)
+	collectCfyInstances = flag.Bool(
+		"collect.cfy_instances", true,
+		"Collect from SHOW SLAVE STATUS",
+	)
 )
 
 // Metric name parts.
@@ -390,6 +394,12 @@ func (e *Exporter) scrape(ch chan<- prometheus.Metric) {
 		if err = collector.ScrapeEngineInnodbStatus(db, ch); err != nil {
 			log.Errorln("Error scraping for collect.engine_innodb_status:", err)
 			e.scrapeErrors.WithLabelValues("collect.engine_innodb_status").Inc()
+		}
+	}
+	if *collectCfyInstances {
+		if err = collector.ScrapeCfyInstances(db, ch); err != nil {
+			log.Errorln("Error scraping for collect.cfy_instances:", err)
+			e.scrapeErrors.WithLabelValues("collect.cfy_instances").Inc()
 		}
 	}
 }
